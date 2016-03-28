@@ -76,12 +76,12 @@ public class Proxy implements Delayed, Serializable {
 
 	private List<Integer> failedErrorType = new ArrayList<Integer>();
 
-	Proxy(HttpHost httpHost) {
+	public Proxy(HttpHost httpHost) {
 		this.httpHost = httpHost;
 		this.canReuseTime = System.nanoTime() + TimeUnit.NANOSECONDS.convert(reuseTimeInterval, TimeUnit.MILLISECONDS);
 	}
 
-	Proxy(HttpHost httpHost, int reuseInterval) {
+	public Proxy(HttpHost httpHost, int reuseInterval) {
 		this.httpHost = httpHost;
 		this.canReuseTime = System.nanoTime() + TimeUnit.NANOSECONDS.convert(reuseInterval, TimeUnit.MILLISECONDS);
 	}
