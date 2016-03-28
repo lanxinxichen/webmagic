@@ -89,11 +89,18 @@ public class HttpClientDownloader extends AbstractDownloader {
         int statusCode=0;
         try {
             HttpUriRequest httpUriRequest = getHttpUriRequest(request, site, headers);
+            HttpContext context = new BasicHttpContext();
+        	httpResponse = getHttpClient(site, request).execute(httpUriRequest,context);
             httpResponse = getHttpClient(site).execute(httpUriRequest);
             statusCode = httpResponse.getStatusLine().getStatusCode();
             request.putExtra(Request.STATUS_CODE, statusCode);
             if (statusAccept(acceptStatCode, statusCode)) {
                 Page page = handleResponse(request, charset, httpResponse, task);
+                // 获取真实访问的URL
+                HttpUriRequest currentReq = (HttpUriRequest) context.getAttribute(ExecutionContext.HTTP_REQUEST);
+                HttpHost currentHost = (HttpHost)  context.getAttribute(ExecutionContext.HTTP_TARGET_HOST);
+                String currentUrl = (currentReq.getURI().isAbsolute()) ? currentReq.getURI().toString() : (currentHost.toURI() + currentReq.getURI());
+                page.setUrl(new PlainText(currentUrl));
                 onSuccess(request);
                 return page;
             } else {
@@ -172,7 +179,7 @@ public class HttpClientDownloader extends AbstractDownloader {
             return RequestBuilder.put();
         } else if (method.equalsIgnoreCase(HttpConstant.Method.DELETE)) {
             return RequestBuilder.delete();
-        } else if (method.equalsIgnoreCase(HttpConstant.Method.TRACE)) {
+        } else if (method.equalsIgnoreCadownloadse(HttpConstant.Method.TRACE)) {
             return RequestBuilder.trace();
         }
         throw new IllegalArgumentException("Illegal HTTP Method " + method);
