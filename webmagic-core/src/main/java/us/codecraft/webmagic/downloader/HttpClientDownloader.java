@@ -89,11 +89,17 @@ public class HttpClientDownloader extends AbstractDownloader {
         int statusCode=0;
         try {
             HttpUriRequest httpUriRequest = getHttpUriRequest(request, site, headers);
-            httpResponse = getHttpClient(site).execute(httpUriRequest);
+			HttpCoreContext context = new HttpCoreContext();
+			httpResponse = getHttpClient(site, request).execute(httpUriRequest,context);
             statusCode = httpResponse.getStatusLine().getStatusCode();
             request.putExtra(Request.STATUS_CODE, statusCode);
             if (statusAccept(acceptStatCode, statusCode)) {
                 Page page = handleResponse(request, charset, httpResponse, task);
+                HttpUriRequest uriRequest = (HttpUriRequest) context.getRequest();
+				HttpHost httpHost = (HttpHost) context.getTargetHost();
+				String currentUrl = (uriRequest.getURI().isAbsolute()) ? uriRequest.getURI().toString()
+						: (httpHost.toURI() + uriRequest.getURI());
+				page.setUrl(new PlainText(currentUrl));
                 onSuccess(request);
                 return page;
             } else {
